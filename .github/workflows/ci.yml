@@ -37,8 +37,13 @@ jobs:
           nohup npm run start > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz
 
+      - name: List tests for debug
+        run: |
+          ls -la tests || true
+          node -e "const fs=require('fs');console.log(fs.readdirSync('tests'))"
+
       - name: Run E2E tests
-        run: npx nyc --reporter=lcov --reporter=text-summary playwright test -c playwright.config.cjs --reporter=github
+        run: npx nyc --reporter=lcov --reporter=text-summary npx playwright test -c playwright.config.cjs --reporter=github
 
       - name: Upload server logs on failure
         if: failure()
