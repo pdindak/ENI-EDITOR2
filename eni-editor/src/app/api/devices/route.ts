@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export const runtime = 'nodejs';
 import { z } from 'zod';
 import { connectDatabase } from '@/server/db';
 import { listDevices, addDevice, deleteDevice } from '@/server/repositories';
@@ -20,20 +21,24 @@ const createSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const json = await request.json().catch(() => ({}));
-  const parsed = createSchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  try {
+    const json = await request.json().catch(() => ({}));
+    const parsed = createSchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    }
+    const db = connectDatabase();
+    const device = addDevice(db, {
+      name: parsed.data.name,
+      host: parsed.data.host,
+      port: parsed.data.port,
+      type: parsed.data.type,
+      active: parsed.data.active ? 1 : 0
+    } as any);
+    return NextResponse.json(device, { status: 201 });
+  } catch (e: any) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
   }
-  const db = connectDatabase();
-  const device = addDevice(db, {
-    name: parsed.data.name,
-    host: parsed.data.host,
-    port: parsed.data.port,
-    type: parsed.data.type,
-    active: parsed.data.active ? 1 : 0
-  } as any);
-  return NextResponse.json(device, { status: 201 });
 }
 
 export async function DELETE(request: Request) {

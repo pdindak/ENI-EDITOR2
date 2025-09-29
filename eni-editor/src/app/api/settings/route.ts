@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+export const runtime = 'nodejs';
 import { z } from 'zod';
 import { connectDatabase } from '@/server/db';
 import { getSettings, updateSettings } from '@/server/repositories';
@@ -16,12 +17,16 @@ const updateSchema = z.object({
 });
 
 export async function PUT(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const parsed = updateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  try {
+    const body = await request.json().catch(() => ({}));
+    const parsed = updateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    }
+    const db = connectDatabase();
+    const updated = updateSettings(db, parsed.data);
+    return NextResponse.json(updated, { status: 200 });
+  } catch (e: any) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
   }
-  const db = connectDatabase();
-  const updated = updateSettings(db, parsed.data);
-  return NextResponse.json(updated, { status: 200 });
 }
