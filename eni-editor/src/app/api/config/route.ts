@@ -28,6 +28,7 @@ export async function PUT(request: Request) {
 		}
 		return NextResponse.json({ error: 'Provide text/plain body or JSON {entries}' }, { status: 400 });
 	} catch (e: any) {
+    console.error('PUT /api/config failed:', e);
 		return NextResponse.json({ error: String(e) }, { status: 500 });
 	}
 }

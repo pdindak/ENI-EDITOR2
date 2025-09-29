@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { expectOk } from './helpers';
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:8080';
 
@@ -17,13 +18,13 @@ test.describe('ENI-Editor basic flows', () => {
 	});
 
 	test('register and login', async ({ request }) => {
-		const reg = await api(request, '/api/auth/register', {
+	const reg = await api(request, '/api/auth/register', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			data: { username: 'tester', password: 'Test#1234', role: 'ENI-SUPERUSER' }
 		});
 		expect([200, 201, 409]).toContain(reg.status());
-		const login = await api(request, '/api/auth/login', {
+	const login = await api(request, '/api/auth/login', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			data: { username: 'tester', password: 'Test#1234' }
@@ -32,12 +33,12 @@ test.describe('ENI-Editor basic flows', () => {
 	});
 
 	test('settings and config API', async ({ request }) => {
-		const s1 = await api(request, '/api/settings');
-		expect(s1.status()).toBe(200);
-		const put = await api(request, '/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, data: { rp_count: 2 } });
-		expect(put.status()).toBe(200);
-		const cfgPut = await api(request, '/api/config', { method: 'PUT', headers: { 'Content-Type': 'text/plain' }, data: 'EMAIL_RECIPIENT=you@example.com' });
-		expect(cfgPut.status()).toBe(200);
+	const s1 = await api(request, '/api/settings');
+	await expectOk(s1, 200);
+	const put = await api(request, '/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, data: { rp_count: 2 } });
+	await expectOk(put, 200);
+	const cfgPut = await api(request, '/api/config', { method: 'PUT', headers: { 'Content-Type': 'text/plain' }, data: 'EMAIL_RECIPIENT=you@example.com' });
+	await expectOk(cfgPut, 200);
 		const cfg = await api(request, '/api/config');
 		expect(cfg.status()).toBe(200);
 		const cfgJson = await cfg.json();

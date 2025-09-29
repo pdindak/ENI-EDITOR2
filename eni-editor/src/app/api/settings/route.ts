@@ -27,6 +27,8 @@ export async function PUT(request: Request) {
     const updated = updateSettings(db, parsed.data);
     return NextResponse.json(updated, { status: 200 });
   } catch (e: any) {
+    // Log to server console for CI debugging
+    console.error('PUT /api/settings failed:', e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }

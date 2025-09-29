@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     } as any);
     return NextResponse.json(device, { status: 201 });
   } catch (e: any) {
+    console.error('POST /api/devices failed:', e);
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }

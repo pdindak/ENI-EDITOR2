@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { expectOk } from './helpers';
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:8080';
 
@@ -23,7 +24,7 @@ test('register, login, me, logout', async ({ request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		data: { username, password }
 	});
-	expect(login.status()).toBe(200);
+	await expectOk(login, 200);
 	// me
 	const me = await api(request, '/api/auth/me');
 	expect(me.status()).toBe(200);

@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { expectOk } from './helpers';
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:8080';
 
 async function api(context, path, init) {
@@ -13,7 +14,7 @@ test('devices CRUD (API)', async ({ request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		data: { name, host: '10.1.2.3', port: 22, type: 'ENI_SERVER', active: true }
 	});
-	expect(add.status()).toBe(201);
+	await expectOk(add, 201);
 	const list = await api(request, '/api/devices');
 	expect(list.status()).toBe(200);
 	const arr = await list.json();
