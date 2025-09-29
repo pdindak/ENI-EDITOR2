@@ -10,6 +10,7 @@ import { configureSessions, mountAuthRoutes } from './src/server/auth.js';
 import { mountTlsRoutes } from './src/server/tls.js';
 import { mountSshKeyRoutes } from './src/server/ssh-keys.js';
 import { mountOpsRoutes } from './src/server/ops-routes.js';
+import { mountApiRoutes } from './src/server/api.js';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const httpPort = Number(process.env.HTTP_PORT || 8080);
@@ -56,6 +57,7 @@ export async function start() {
   server.use(bodyParser.json());
   configureSessions(server);
   mountAuthRoutes(server);
+  mountApiRoutes(server);
 
   // TLS management routes with hot-reload (must be before Next catch-all)
   const isSuperuserGuard = (req, res, nextFn) => {
