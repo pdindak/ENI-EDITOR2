@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eni-editor
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: eni-editor/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start server
+        run: |
+          nohup npm run start > server.out 2>&1 &
+          npx wait-on http://127.0.0.1:8080/healthz
+
+      - name: Run E2E tests
+        run: npx nyc --reporter=lcov --reporter=text-summary playwright test -c playwright.config.cjs --reporter=github
+
+      - name: Upload server logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: eni-editor/server.out
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: eni-editor/coverage
+

@@ -1,0 +1,19 @@
+{
+  "all": true,
+  "extension": [
+    ".js"
+  ],
+  "include": [
+    "server.js",
+    "src/server/**/*.js"
+  ],
+  "exclude": [
+    "tests/**",
+    "node_modules/**"
+  ],
+  "reporter": [
+    "lcov",
+    "text-summary"
+  ],
+  "cache": false
+}

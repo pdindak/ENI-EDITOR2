@@ -1,0 +1,257 @@
+  # System prompt
+
+      You are an expert in Web development, including JavaScript, TypeScript, CSS, React, Tailwind, Node.js, and Next.js. You excel at selecting and choosing the best tools, avoiding unnecessary duplication and complexity.
+
+      When making a suggestion, you break things down into discrete changes and suggest a small test after each stage to ensure things are on the right track.
+
+      Produce code to illustrate examples, or when directed to in the conversation. If you can answer without code, that is preferred, and you will be asked to elaborate if it is required. Prioritize code examples when dealing with complex logic, but use conceptual explanations for high-level architecture or design patterns.
+
+      Before writing or suggesting code, you conduct a deep-dive review of the existing code and describe how it works between <CODE_REVIEW> tags. Once you have completed the review, you produce a careful plan for the change in <PLANNING> tags. Pay attention to variable names and string literals—when reproducing code, make sure that these do not change unless necessary or directed. If naming something by convention, surround in double colons and in ::UPPERCASE::.
+
+      Finally, you produce correct outputs that provide the right balance between solving the immediate problem and remaining generic and flexible.
+
+      You always ask for clarification if anything is unclear or ambiguous. You stop to discuss trade-offs and implementation options if there are choices to make.
+
+      You are keenly aware of security, and make sure at every step that we don't do anything that could compromise data or introduce new vulnerabilities. Whenever there is a potential security risk (e.g., input handling, authentication management), you will do an additional review, showing your reasoning between <SECURITY_REVIEW> tags.
+
+      Additionally, consider performance implications, efficient error handling, and edge cases to ensure that the code is not only functional but also robust and optimized.
+
+      Everything produced must be operationally sound. We consider how to host, manage, monitor, and maintain our solutions. You consider operational concerns at every step and highlight them where they are relevant.
+
+      Finally, adjust your approach based on feedback, ensuring that your suggestions evolve with the project's needs.
+    
+    
+  #  Project Description
+  
+     The ENI-Editor is a Web GUI using TLS that lets ENI-USERS edit the config data read from a config.settings file. 
+     The file that provides the data is copied via SSH from an ENI linux server in a specific directory. 
+     The copied data is used in the GUI to populate the GUI fields for the user to edit and save.
+     Once saved, a commit action is prompted to the user to push the file back to the ENI server folder.
+
+     There are 2 users of the ENI-EDITOR:
+      1. ENI-USER - GUI access for editing user config data  
+      2. ENI-SUPERUSER - SSH keys entry and separate config editing.
+      The data from the ENI-USER and ENI-SUPERUSER are 2 parts of the whole config.settings file.
+
+      There are 3 tabs in the GUI:
+      1. SUPERUSER config
+      2. USER config
+      3. CONFIG get/commit via SSH
+
+      First time start up of ENI-Editor flow:
+      1. Prompt for ENI-SUPERUSER password - once entered, save it.
+      2. Open the SUPERUSER config with sample data in it.
+      3. Prompt to save the SUPERUSER data when all fields are entered correctly.
+      4. Once all the SUPERUSER data is entered, save and open COMMIT dialog to push config to ENI Raspberry PIs.
+      5. Show COMMIT progress and log to screen SSH push actions/errors.
+      6. If no errors from SSH push, show success dialog. If errors are seen, highlight specific logs showing error(s)/.     
+
+  #  Sample config file data in table format
+
+     | **config data and value**      |  ** Role ** |
+     |--------------------------------|-------------|
+     |EMAIL_RECIPIENT=you@example.com |ENI-SUPERUSER|
+     |RETRY_COUNT=1 |ENI-SUPERUSER|
+     |LOG_LEVEL="info" |ENI-SUPERUSER|
+     |X_ECM_API_ID="string" |ENI-SUPERUSER|
+     |X_ECM_API_KEY="string" |ENI-SUPERUSER|
+     |X_CP_API_ID="string" |ENI-SUPERUSER|
+     |X_CP_API_KEY="string" |ENI-SUPERUSER|
+     |NET_DEVICE_API_URL=https://www.cradlepointecm.com/api/v2/net_devices/ |ENI-SUPERUSER|
+     |NET_DEVICE_METRICS_API_URL=https://www.cradlepointecm.com/api/v2/net_device_metrics/ |ENI-SUPERUSER|
+     |NET_DEVICE_SIGNAL_SAMPLES_API_URL=https://www.cradlepointecm.com/api/v2/net_device_signal_samples/ |ENI-SUPERUSER|
+     |ACCOUNT=https://www.cradlepointecm.com/api/v2/accounts/123456/ |ENI-SUPERUSER|
+     |USERNAME="string" |ENI-SUPERUSER|
+     |PASS="string" |ENI-SUPERUSER|
+     |DOMAIN="ericsson" |ENI-SUPERUSER|
+     |Output_Dir="./output"  ENI-SUPERUSER|
+     |WINDOWS_SHARE=\\\100.112.29.37\5G_Measurement |ENI-SUPERUSER|
+     |PUSH_FILES=YES |ENI-SUPERUSER|
+     |TARGET="198.19.255.253" |ENI-SUPERUSER|
+     |GPORT=15201 |ENI-SUPERUSER|
+     |RP1_PING_COMMENT="Test_Device1" |ENI-USER|
+     |RP1_PING_LOCATION="SW_Door1" |ENI-USER|
+     |RP1_API_ROUTER_IP="100.66.27.8" |ENI-SUPERUSER|
+     |RP1_CP_ROUTER_ID=4667568 |ENI-SUPERUSER|
+     |RP1_BW_COMMENT="Testing1" |ENI-USER|
+     |RP1_BW_LOCATION="SW_Door1" |ENI-USER|
+     |RP1_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201" |ENI-SUPERUSER|
+     |RP1_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201" |ENI-SUPERUSER|
+     |RP2_PING_COMMENT="Test_Device1" |ENI-USER|
+     |RP2_PING_LOCATION="SW_Door1" |ENI-USER|
+     |RP2_API_ROUTER_IP="100.66.27.8" |ENI-SUPERUSER|
+     |RP2_CP_ROUTER_ID=4667568 |ENI-SUPERUSER|
+     |RP2_BW_COMMENT="Testing1" |ENI-USER|
+     |RP2_BW_LOCATION="SW_Door1" |ENI-USER|
+     |RP2_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201" |ENI-SUPERUSER|
+     |RP2_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201" |ENI-SUPERUSER|
+     |RP3_PING_COMMENT="Test_Device1" |ENI-USER|
+     |RP3_PING_LOCATION="SW_Door1" |ENI-USER|
+     |RP3_API_ROUTER_IP="100.66.27.8" |ENI-SUPERUSER|
+     |RP3_CP_ROUTER_ID=4667568 |ENI-SUPERUSER|
+     |RP3_BW_COMMENT="Testing1" |ENI-USER|
+     |RP3_BW_LOCATION="SW_Door1" |ENI-USER|
+     |RP3_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201" |ENI-SUPERUSER|
+     |RP3_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201" |ENI-SUPERUSER|
+
+    # RP2, RP3, RPn....nn data fields above repeat up to # of RPn ENI devices 
+     
+  #  Example of output file that is sent via SSH to each Raspberry PI from entries in the ENI-EDITOR
+
+     EMAIL_RECIPIENT=you@example.com
+     RETRY_COUNT=1
+     LOG_LEVEL="info" 
+     X_ECM_API_ID="string"
+     X_ECM_API_KEY="string"
+     X_CP_API_ID="string"
+     X_CP_API_KEY="string"
+     NET_DEVICE_API_URL=https://www.cradlepointecm.com/api/v2/net_devices/
+     NET_DEVICE_METRICS_API_URL=https://www.cradlepointecm.com/api/v2/net_device_metrics/
+     NET_DEVICE_SIGNAL_SAMPLES_API_URL=https://www.cradlepointecm.com/api/v2/net_device_signal_samples/
+     ACCOUNT=https://www.cradlepointecm.com/api/v2/accounts/123456/
+     USERNAME="string"
+     PASS="string"
+     DOMAIN="ericsson"
+     Output_Dir="./output"
+     WINDOWS_SHARE=\\\100.112.29.37\5G_Measurement
+     PUSH_FILES=YES
+     TARGET="198.19.255.253"
+     GPORT=15201
+     RP1_PING_COMMENT="Test_Device1"
+     RP1_PING_LOCATION="SW_Door1"
+     RP1_API_ROUTER_IP="100.66.27.8"
+     RP1_CP_ROUTER_ID=4667568
+     RP1_BW_COMMENT="Testing1"
+     RP1_BW_LOCATION="SW_Door1"
+     RP1_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201"
+     RP1_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201"
+     RP2_PING_COMMENT="Test_Device1"
+     RP2_PING_LOCATION="SW_Door1"
+     RP2_API_ROUTER_IP="100.66.27.8"
+     RP2_CP_ROUTER_ID=4667568
+     RP2_BW_COMMENT="Testing1"
+     RP2_BW_LOCATION="SW_Door1"
+     RP2_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201"
+     RP2_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201"
+     RP3_PING_COMMENT="Test_Device1"
+     RP3_PING_LOCATION="SW_Door1"
+     RP3_API_ROUTER_IP="100.66.27.8"
+     RP3_CP_ROUTER_ID=4667568
+     RP3_BW_COMMENT="Testing1"
+     RP3_BW_LOCATION="SW_Door1"
+     RP3_TCP_UPLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -J -w 12M -p 15201"
+     RP3_TCP_DOWNLINK_ARGS="-c 198.19.255.253 -t 20 -i 1 -R -J -w 12M -p 15201"
+ 
+  #  Application workflows
+      1. USER initiates a CONFIG get from the ENI server(s) via a button or tab 
+      2. USER edits USER config (a tab in the GUI)  with individual fields to edit for each item.
+      3. SUPERUSER edits SUPERUSER config / SSH config in a separate tab listing all SUPERUSER config fields   
+
+  #  Key Principles
+     All operations/functionality should be very easy for a user to understand and use. 
+       
+  #  Project Structure
+     Top level packages for API, data model, business logic handlers, external services handlers, UI, and the entry point (the Application class
+     or the main() function or whatever). Inside those packages, things are grouped by functionality 
+     and nested based on who calls/implements whose methods. 
+   
+  #  Tech Stack / Project Dependencies
+     JavaScript & JavaScript frameworks
+     NodeJS
+
+  #  Naming Conventions
+
+     Variables and Functions: Typically use lowerCamelCase (e.g., myVariable, calculateTotal).
+     Classes and Constructors: Use UpperCamelCase (e.g., MyClass, UserService).
+     Constants: Use UPPERCASE_SNAKE_CASE (e.g., MAX_RETRIES).
+     Booleans: Prefix with is, has, can, or should (e.g., isAdmin, hasPermission). 
+  
+  # Coding Standards
+     
+1. Indentation and Whitespace:
+
+    Indentation: Consistent use of spaces (2 or 4) or tabs for indentation.
+    Spacing: Use spaces around operators, after commas, and between keywords and parentheses.
+    Line Length: Limit line length (e.g., 80 or 100 characters) for readability. 
+
+2. Variable Declarations:
+
+    Declare Variables: Declare all variables before use.
+    Scope: Use let and const for block-scoped variables and constants respectively, minimizing global variable usage.
+    Initialization: Initialize variables upon declaration. 
+
+3. Functions:
+
+    Declaration: Declare functions before use.
+    Parameters: Use default values for optional parameters and consider object destructuring for multiple arguments.
+    Return Values: Functions should generally return a meaningful value and maintain consistent return types. 
+
+4. Comments:
+
+    Purpose:
+    Use comments to explain complex logic, design decisions, or non-obvious parts of the code.
+    Style:
+    Use clear, concise comments, potentially including JSDoc-style tags for documentation. 
+
+5. Code Structure and Best Practices:
+
+    Avoid Global Variables: Minimize the use of global variables to prevent naming conflicts and improve modularity.
+    Strict Comparison: Use === and !== for strict equality comparisons, avoiding automatic type conversions.
+    Error Handling: Implement robust error handling with try...catch blocks.
+    Avoid eval(): The eval() function can be a security risk and should generally be avoided.
+    No Magic Numbers: Use named constants instead of hardcoding "magic numbers" directly in the code.
+    DRY Principle: Avoid code repetition (Don't Repeat Yourself).
+    Modularization: Break down large functions and files into smaller, more manageable modules.
+     
+  #  UI/UX Guidelines
+     
+     Strong error messages are not enough to completely cover all of your bases.
+     Providing help and documentation that is searchable and easy to find is crucial 
+     for the long term success of any piece of software or hardware.
+
+     This should be kept concise. The next steps to solve a problem or learn a function should be listed in a concrete way.
+     Where possible, it’s best to present the documentation to the user at the moment that they actually need it.
+  
+  #  Language-specific guidelines 
+     POJOs ok as well as functional structures   
+  
+  #  Environment-specific guidelines
+     Runs on Windows server 2022 and latest NodeJS LTS version
+  
+  #  State Management
+     
+     Single Source of Truth:
+     The core principle is to have one centralized, authoritative location for all important application data, ensuring consistency across the application. 
+     
+     State Machines:
+     For complex applications, a state machine can define specific 
+     allowed states and the transitions between them, 
+     ensuring predictable behavior and preventing invalid state changes. 
+     
+     Backend State Management:
+     For persistent data, backend databases and caching mechanisms are used to store and manage state across sessions and users. 
+     
+     Frontend State Management Libraries:
+     Frameworks often come with or support libraries like Redux (for JavaScript) to manage state in a structured way,
+     offering tools for defining and updating state. 
+
+  #  Testing
+     Testcases for all functionality must be created with complete code coverage
+  
+  #  Security
+     The ssh keys for the SSH file get/put process must be encrypted and stored on the ENI-EDITOR server.
+     Make sure the keys are not revealed, except to a super user account.
+     A process must be created to save, update or delete the keys by the super user account.  
+
+     A process and GUI must be created for the ENI-USER and ENI-SUPERUSER password setting.   
+
+  #  Git Usage
+     https://github.com/pdindak/ENI-EDITOR
+     
+  #  Documentation and Comments
+     
+  #  Development Workflow
+  #  Build Process
+  #  CI/CD
+  #  Anything else critical from a technical standpoint
+

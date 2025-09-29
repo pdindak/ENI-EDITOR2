@@ -1,0 +1,21 @@
+appId: com.example.eni_editor
+productName: ENI-Editor
+files:
+  - dist/**
+  - server.js
+  - package.json
+  - .next/**
+  - next.config.mjs
+extraResources:
+  - from: certs
+    to: certs
+    filter: ["**/*"]
+directories:
+  output: release
+asar: true
+win:
+  target: nsis
+  artifactName: "${productName}-Setup-${version}.${ext}"
+nsis:
+  oneClick: true
+  perMachine: true
