@@ -1,5 +1,5 @@
 // @ts-check
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 const BASE = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:8080';
 
 async function api(context, path, init) {
