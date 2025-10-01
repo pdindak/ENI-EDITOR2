@@ -55,6 +55,7 @@ export async function start() {
 
   const server = express();
   server.use(bodyParser.json());
+  server.use(bodyParser.text());
   configureSessions(server);
   mountAuthRoutes(server);
   mountApiRoutes(server);

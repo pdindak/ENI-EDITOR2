@@ -10,9 +10,31 @@ export function updateSettings(db, values) {
 	const dbc = db || connectDatabase();
 	const current = dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 	const next = { ...current, ...values };
-	dbc.prepare(
-		`UPDATE settings SET rp_count = ?, linux_source_path = ?, rpi_destination_path = ?, updated_at = datetime('now') WHERE id = 1`
-	).run(next.rp_count, next.linux_source_path, next.rpi_destination_path);
+	
+	// Build dynamic SQL for partial updates
+	const fields = [];
+	const params = [];
+	
+	if (values.rp_count !== undefined) {
+		fields.push('rp_count = ?');
+		params.push(next.rp_count);
+	}
+	if (values.linux_source_path !== undefined) {
+		fields.push('linux_source_path = ?');
+		params.push(next.linux_source_path);
+	}
+	if (values.rpi_destination_path !== undefined) {
+		fields.push('rpi_destination_path = ?');
+		params.push(next.rpi_destination_path);
+	}
+	
+	if (fields.length === 0) {
+		return current; // No updates needed
+	}
+	
+	fields.push('updated_at = datetime(\'now\')');
+	const sql = `UPDATE settings SET ${fields.join(', ')} WHERE id = 1`;
+	dbc.prepare(sql).run(...params);
 	return dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 }
 
