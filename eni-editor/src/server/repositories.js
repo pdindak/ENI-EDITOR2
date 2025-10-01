@@ -10,26 +10,31 @@ export function updateSettings(db, values) {
 	const dbc = db || connectDatabase();
 	const current = dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 	const next = { ...current, ...values };
-	// Only update fields that are provided and not undefined
-	const updates = [];
+	
+	// Build dynamic SQL for partial updates
+	const fields = [];
 	const params = [];
+	
 	if (values.rp_count !== undefined) {
-		updates.push('rp_count = ?');
+		fields.push('rp_count = ?');
 		params.push(next.rp_count);
 	}
 	if (values.linux_source_path !== undefined) {
-		updates.push('linux_source_path = ?');
+		fields.push('linux_source_path = ?');
 		params.push(next.linux_source_path);
 	}
 	if (values.rpi_destination_path !== undefined) {
-		updates.push('rpi_destination_path = ?');
+		fields.push('rpi_destination_path = ?');
 		params.push(next.rpi_destination_path);
 	}
-	updates.push('updated_at = datetime(\'now\')');
 	
-	if (updates.length > 1) { // More than just updated_at
-		dbc.prepare(`UPDATE settings SET ${updates.join(', ')} WHERE id = 1`).run(...params);
+	if (fields.length === 0) {
+		return current; // No updates needed
 	}
+	
+	fields.push('updated_at = datetime(\'now\')');
+	const sql = `UPDATE settings SET ${fields.join(', ')} WHERE id = 1`;
+	dbc.prepare(sql).run(...params);
 	return dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 }
 
