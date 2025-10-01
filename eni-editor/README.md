@@ -110,7 +110,20 @@ eni-editor/
 
 ## 📖 Documentation
 
-For detailed documentation, see [DOCUMENTATION.md](./DOCUMENTATION.md)
+Comprehensive documentation is available in multiple formats:
+
+- **[DOCUMENTATION.md](./DOCUMENTATION.md)** - Detailed system documentation
+- **[APPLICATION_DOCUMENTATION.md](./APPLICATION_DOCUMENTATION.md)** - Complete technical reference with API examples
+- **[USER_GUIDE.md](./USER_GUIDE.md)** - User-focused operational guide
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture and design
+- **README.md** - Quick start and overview (this file)
+
+### Enhanced Documentation Features
+- ✅ **Complete API Reference** with request/response examples
+- ✅ **Detailed Configuration Field Descriptions** with valid values and examples
+- ✅ **HTTP Status Code Reference** with error handling guidance
+- ✅ **Performance Considerations** and scaling recommendations
+- ✅ **Resource Requirements** for different deployment sizes
 
 ## 🔄 Workflow
 

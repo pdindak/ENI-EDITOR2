@@ -58,18 +58,14 @@ ENI-USER accounts can edit user-specific configuration settings for ENI devices.
 ENI-USERs can modify the following configuration parameters:
 
 **Ping Test Settings:**
-- `RP1_PING_COMMENT` - Description for ping test device 1
-- `RP1_PING_LOCATION` - Physical location of ping test device 1
-- `RP2_PING_COMMENT` - Description for ping test device 2
-- `RP2_PING_LOCATION` - Physical location of ping test device 2
-- *(continues for each RP device)*
+- `RP{n}_PING_COMMENT` - Descriptive name for ping test device n (max 100 characters, e.g., "Main Test Device")
+- `RP{n}_PING_LOCATION` - Physical location of ping test device n (max 100 characters, e.g., "Central Office Room 5")
+- *(where {n} represents the device number: 1, 2, 3, etc., based on your rp_count setting)*
 
 **Bandwidth Test Settings:**
-- `RP1_BW_COMMENT` - Description for bandwidth test device 1
-- `RP1_BW_LOCATION` - Physical location of bandwidth test device 1
-- `RP2_BW_COMMENT` - Description for bandwidth test device 2
-- `RP2_BW_LOCATION` - Physical location of bandwidth test device 2
-- *(continues for each RP device)*
+- `RP{n}_BW_COMMENT` - Descriptive name for bandwidth test device n (max 100 characters, e.g., "Bandwidth Test Unit A")
+- `RP{n}_BW_LOCATION` - Physical location of bandwidth test device n (max 100 characters, e.g., "Central Office Room 5")
+- *(where {n} represents the device number: 1, 2, 3, etc., based on your rp_count setting)*
 
 ### Step-by-Step Configuration
 
@@ -137,36 +133,36 @@ ENI-SUPERUSER accounts have full access to all system features including configu
 ENI-SUPERUSERs can modify all configuration parameters including:
 
 **System Settings:**
-- `EMAIL_RECIPIENT` - Email address for notifications
-- `RETRY_COUNT` - Number of retry attempts for operations
-- `LOG_LEVEL` - Logging verbosity (info, debug, error)
-- `X_ECM_API_ID` - ECM API identifier
-- `X_ECM_API_KEY` - ECM API authentication key
-- `X_CP_API_ID` - CP API identifier
-- `X_CP_API_KEY` - CP API authentication key
+- `EMAIL_RECIPIENT` - Email address for system notifications and alerts (format: user@domain.com)
+- `RETRY_COUNT` - Number of retry attempts for failed operations (valid range: 1-10, default: 3)
+- `LOG_LEVEL` - Logging verbosity level (options: info, debug, error)
+- `X_ECM_API_ID` - ECM API identifier for external API authentication (alphanumeric string)
+- `X_ECM_API_KEY` - ECM API authentication key (Base64 encoded string)
+- `X_CP_API_ID` - CP API identifier for external API authentication (alphanumeric string)
+- `X_CP_API_KEY` - CP API authentication key (Base64 encoded string)
 
 **Network Configuration:**
-- `NET_DEVICE_API_URL` - Network device API endpoint
-- `NET_DEVICE_METRICS_API_URL` - Network device metrics API endpoint
-- `NET_DEVICE_SIGNAL_SAMPLES_API_URL` - Signal samples API endpoint
-- `ACCOUNT` - Account API endpoint
-- `USERNAME` - System username
-- `PASS` - System password
-- `DOMAIN` - Network domain (e.g., "ericsson")
+- `NET_DEVICE_API_URL` - Network device API endpoint (valid HTTP/HTTPS URL)
+- `NET_DEVICE_METRICS_API_URL` - Network device metrics API endpoint (valid HTTP/HTTPS URL)
+- `NET_DEVICE_SIGNAL_SAMPLES_API_URL` - Signal samples API endpoint (valid HTTP/HTTPS URL)
+- `ACCOUNT` - Account API endpoint for user authentication (valid HTTP/HTTPS URL)
+- `USERNAME` - System username for API authentication (alphanumeric string, no spaces)
+- `PASS` - System password for API authentication (secure password string)
+- `DOMAIN` - Network domain identifier (e.g., "ericsson", "company")
 
 **File Operations:**
-- `Output_Dir` - Output directory path
-- `WINDOWS_SHARE` - Windows share path
-- `PUSH_FILES` - Enable/disable file pushing (YES/NO)
-- `TARGET` - Target IP address for operations
-- `GPORT` - Gateway port number
+- `Output_Dir` - Local output directory path for generated files (valid filesystem path)
+- `WINDOWS_SHARE` - Windows network share path (UNC format: \\\\server\\share\\path)
+- `PUSH_FILES` - Enable/disable automatic file pushing to remote systems (YES/NO)
+- `TARGET` - Target IP address for network operations (valid IPv4 address)
+- `GPORT` - Gateway port number for network operations (valid range: 1-65535)
 
 **Device-Specific Settings (for each RP):**
-- `RP1_API_ROUTER_IP` - IP address of API router for device 1
-- `RP1_CP_ROUTER_ID` - CradlePoint router ID for device 1
-- `RP1_TCP_UPLINK_ARGS` - TCP uplink test arguments
-- `RP1_TCP_DOWNLINK_ARGS` - TCP downlink test arguments
-- *(continues for each RP device)*
+- `RP{n}_API_ROUTER_IP` - IP address of API router for device n (valid IPv4 address, e.g., "100.66.27.8")
+- `RP{n}_CP_ROUTER_ID` - CradlePoint router ID for device n (alphanumeric string, e.g., "router_001")
+- `RP{n}_TCP_UPLINK_ARGS` - TCP uplink test arguments (command line arguments, e.g., "--duration 60 --parallel 4")
+- `RP{n}_TCP_DOWNLINK_ARGS` - TCP downlink test arguments (command line arguments, e.g., "--duration 60 --parallel 8")
+- *(where {n} represents the device number: 1, 2, 3, etc., based on your rp_count setting)*
 
 #### 2. Device Management
 
@@ -402,6 +398,29 @@ A: Look for the HTTPS indicator in your browser and verify the certificate is va
 
 ---
 
+## Performance Tips
+
+### For ENI-USERs
+- **Save frequently**: Save your configuration changes regularly to avoid data loss
+- **Coordinate with team**: Check with other users before making changes to avoid conflicts
+- **Use descriptive names**: Clear device names and locations help with identification
+- **Test changes**: Work with your superuser to test configuration changes before full deployment
+
+### For ENI-SUPERUSERs
+- **Monitor system load**: Watch server performance during SSH operations
+- **Batch operations**: Group configuration changes together to reduce system load
+- **Backup before changes**: Always backup configuration before major changes
+- **Monitor logs**: Regularly check operation logs for errors or performance issues
+- **Optimize SSH keys**: Use strong but efficient SSH key formats (RSA 4096-bit or Ed25519)
+
+### System Performance Guidelines
+- **Small deployments (1-10 devices)**: Excellent performance, no special considerations needed
+- **Medium deployments (10-50 devices)**: Monitor database size and consider SSD storage
+- **Large deployments (50+ devices)**: Consider performance optimizations and monitoring
+- **SSH operations**: Allow sufficient time for operations with many devices (can take several minutes)
+
+---
+
 ## Support
 
 For additional support:
@@ -409,6 +428,7 @@ For additional support:
 2. **Contact your ENI-SUPERUSER** for system-related issues
 3. **Review this user guide** for common solutions
 4. **Document any issues** you encounter for troubleshooting
+5. **Check performance tips** above for optimization guidance
 
 ---
 

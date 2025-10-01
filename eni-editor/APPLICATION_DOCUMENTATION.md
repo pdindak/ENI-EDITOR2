@@ -182,58 +182,560 @@ eni-editor/
 ## API Endpoints Reference
 
 ### Authentication
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| POST | `/api/auth/register` | Register new user | Public |
-| POST | `/api/auth/login` | Authenticate user | Public |
-| POST | `/api/auth/logout` | Terminate session | Authenticated |
-| GET | `/api/auth/me` | Get current user | Authenticated |
+
+#### POST `/api/auth/register`
+Register a new user account.
+
+**Request:**
+```json
+{
+  "username": "john.doe",
+  "password": "SecurePass123!",
+  "role": "ENI-USER"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "username, password, role required"
+}
+```
+
+**Response (409 Conflict):**
+```json
+{
+  "error": "username already exists"
+}
+```
+
+#### POST `/api/auth/login`
+Authenticate user and create session.
+
+**Request:**
+```json
+{
+  "username": "john.doe",
+  "password": "SecurePass123!"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "username and password required"
+}
+```
+
+**Response (401 Unauthorized):**
+```json
+{
+  "error": "invalid credentials"
+}
+```
+
+#### GET `/api/auth/me`
+Get current authenticated user information.
+
+**Response (200 OK):**
+```json
+{
+  "user": {
+    "id": 1,
+    "username": "john.doe",
+    "role": "ENI-USER"
+  }
+}
+```
+
+**Response (200 OK - Not Authenticated):**
+```json
+{
+  "user": null
+}
+```
+
+#### POST `/api/auth/logout`
+Terminate current user session.
+
+**Response (204 No Content):**
+*(Empty response body)*
 
 ### Configuration
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/config` | Get all configuration | Authenticated |
-| PUT | `/api/config` | Update configuration | Authenticated |
+
+#### GET `/api/config`
+Retrieve all configuration entries and generated text.
+
+**Response (200 OK):**
+```json
+{
+  "entries": {
+    "EMAIL_RECIPIENT": "admin@company.com",
+    "RETRY_COUNT": "3",
+    "RP1_PING_COMMENT": "Main Test Device",
+    "RP1_PING_LOCATION": "Central Office Room 5"
+  },
+  "text": "EMAIL_RECIPIENT=admin@company.com\nRETRY_COUNT=3\nRP1_PING_COMMENT=Main Test Device\nRP1_PING_LOCATION=Central Office Room 5\n"
+}
+```
+
+**Response (500 Internal Server Error):**
+```json
+{
+  "error": "Database connection failed"
+}
+```
+
+#### PUT `/api/config`
+Update configuration entries. Accepts both JSON and text/plain formats.
+
+**Request (JSON Format):**
+```json
+{
+  "entries": {
+    "EMAIL_RECIPIENT": "newadmin@company.com",
+    "RETRY_COUNT": "5"
+  }
+}
+```
+
+**Request (Text/Plain Format):**
+```
+EMAIL_RECIPIENT=newadmin@company.com
+RETRY_COUNT=5
+RP1_PING_COMMENT=Updated Device Name
+```
+
+**Response (200 OK):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "Provide text/plain body or JSON {entries}"
+}
+```
 
 ### Settings
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/settings` | Get application settings | Authenticated |
-| PUT | `/api/settings` | Update application settings | Authenticated |
+
+#### GET `/api/settings`
+Retrieve system-wide application settings.
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "rp_count": 3,
+  "linux_source_path": "/etc/eni/config.settings",
+  "rpi_destination_path": "/ephidin/ENI/config",
+  "created_at": "2024-01-15 10:30:00",
+  "updated_at": "2024-01-15 14:45:00"
+}
+```
+
+**Response (500 Internal Server Error):**
+```json
+{
+  "error": "Database connection failed"
+}
+```
+
+#### PUT `/api/settings`
+Update system-wide application settings.
+
+**Request:**
+```json
+{
+  "rp_count": 5,
+  "linux_source_path": "/opt/eni/config.settings",
+  "rpi_destination_path": "/home/pi/ENI/config"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "rp_count": 5,
+  "linux_source_path": "/opt/eni/config.settings",
+  "rpi_destination_path": "/home/pi/ENI/config",
+  "created_at": "2024-01-15 10:30:00",
+  "updated_at": "2024-01-15 16:20:00"
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": {
+    "fieldErrors": {
+      "rp_count": ["Number must be greater than or equal to 1"],
+      "linux_source_path": ["String must contain at least 1 character(s)"]
+    }
+  }
+}
+```
 
 ### Device Management
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/devices` | List devices | Authenticated |
-| POST | `/api/devices` | Add device | Authenticated |
-| DELETE | `/api/devices` | Remove device | Authenticated |
+
+#### GET `/api/devices`
+List all devices or filter by type.
+
+**Query Parameters:**
+- `type` (optional): Filter by device type (`ENI_SERVER` or `RASPBERRY_PI`)
+
+**Request Examples:**
+- `GET /api/devices` - List all devices
+- `GET /api/devices?type=ENI_SERVER` - List only ENI servers
+- `GET /api/devices?type=RASPBERRY_PI` - List only Raspberry Pi devices
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Main ENI Server",
+    "host": "192.168.1.100",
+    "port": 22,
+    "type": "ENI_SERVER",
+    "active": 1,
+    "created_at": "2024-01-15 10:30:00"
+  },
+  {
+    "id": 2,
+    "name": "RP Test Device 1",
+    "host": "192.168.1.201",
+    "port": 22,
+    "type": "RASPBERRY_PI",
+    "active": 1,
+    "created_at": "2024-01-15 10:35:00"
+  }
+]
+```
+
+#### POST `/api/devices`
+Add a new device to the inventory.
+
+**Request:**
+```json
+{
+  "name": "New ENI Server",
+  "host": "192.168.1.150",
+  "port": 22,
+  "type": "ENI_SERVER",
+  "active": true
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 3,
+  "name": "New ENI Server",
+  "host": "192.168.1.150",
+  "port": 22,
+  "type": "ENI_SERVER",
+  "active": 1,
+  "created_at": "2024-01-15 16:45:00"
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": {
+    "fieldErrors": {
+      "name": ["String must contain at least 1 character(s)"],
+      "host": ["String must contain at least 1 character(s)"],
+      "type": ["Invalid enum value. Expected 'ENI_SERVER' | 'RASPBERRY_PI'"]
+    }
+  }
+}
+```
+
+#### DELETE `/api/devices`
+Remove a device from the inventory.
+
+**Query Parameters:**
+- `id` (required): Device ID to delete
+
+**Request Example:**
+`DELETE /api/devices?id=3`
+
+**Response (204 No Content):**
+*(Empty response body)*
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "id query parameter is required"
+}
+```
 
 ### SSH Operations (Superuser Only)
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/ops/logs` | Get operation logs | Superuser |
-| POST | `/api/ops/get-config` | Fetch config from ENI servers | Superuser |
-| POST | `/api/ops/commit-config` | Deploy config to Raspberry Pis | Superuser |
+
+#### GET `/api/ops/logs`
+Retrieve operation logs with optional limit.
+
+**Query Parameters:**
+- `limit` (optional): Maximum number of log entries to return (default: 200)
+
+**Request Examples:**
+- `GET /api/ops/logs` - Get last 200 log entries
+- `GET /api/ops/logs?limit=50` - Get last 50 log entries
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "type": "get",
+    "message": "Fetched config from 192.168.1.100",
+    "level": "info",
+    "created_at": "2024-01-15 16:45:00"
+  },
+  {
+    "id": 2,
+    "type": "commit",
+    "message": "Pushed config to 192.168.1.201",
+    "level": "info",
+    "created_at": "2024-01-15 16:46:00"
+  },
+  {
+    "id": 3,
+    "type": "get",
+    "message": "Failed fetching from 192.168.1.102: Connection timeout",
+    "level": "error",
+    "created_at": "2024-01-15 16:47:00"
+  }
+]
+```
+
+**Response (403 Forbidden):**
+```json
+{
+  "error": "forbidden"
+}
+```
+
+#### POST `/api/ops/get-config`
+Fetch configuration from the first available ENI server and store locally.
+
+**Response (200 OK):**
+```json
+{
+  "ok": true,
+  "parsedCount": 25
+}
+```
+
+**Response (500 Internal Server Error):**
+```json
+{
+  "error": "No ENI server accessible"
+}
+```
+
+#### POST `/api/ops/commit-config`
+Deploy current configuration to all active Raspberry Pi devices.
+
+**Response (200 OK):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (500 Internal Server Error):**
+```json
+{
+  "error": "SSH connection failed to 192.168.1.201"
+}
+```
 
 ### SSH Key Management (Superuser Only)
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/ssh-keys/status` | Check SSH key status | Superuser |
-| POST | `/api/ssh-keys/upload` | Upload SSH key pair | Superuser |
-| DELETE | `/api/ssh-keys` | Remove SSH keys | Superuser |
+
+#### GET `/api/ssh-keys/status`
+Check the status of uploaded SSH keys.
+
+**Response (200 OK):**
+```json
+{
+  "hasPrivate": true,
+  "hasPublic": true
+}
+```
+
+**Response (403 Forbidden):**
+```json
+{
+  "error": "forbidden"
+}
+```
+
+#### POST `/api/ssh-keys/upload`
+Upload SSH key pair (private key required, public key optional).
+
+**Request (multipart/form-data):**
+- `private` (required): Private key file (.pem, .key)
+- `public` (optional): Public key file (.pub)
+
+**Response (201 Created):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "private key required"
+}
+```
+
+#### DELETE `/api/ssh-keys`
+Remove all uploaded SSH keys.
+
+**Response (204 No Content):**
+*(Empty response body)*
+
+**Response (403 Forbidden):**
+```json
+{
+  "error": "forbidden"
+}
+```
 
 ### TLS Management (Superuser Only)
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/api/tls/status` | Check TLS certificate status | Superuser |
-| POST | `/api/tls/reload` | Reload HTTPS server | Superuser |
-| POST | `/api/tls/upload/pfx` | Upload PFX certificate | Superuser |
-| POST | `/api/tls/upload/pem` | Upload PEM certificates | Superuser |
+
+#### GET `/api/tls/status`
+Check the status of TLS certificate files.
+
+**Response (200 OK):**
+```json
+{
+  "pfx": true,
+  "key": false,
+  "crt": false,
+  "chain": false
+}
+```
+
+**Response (403 Forbidden):**
+```json
+{
+  "error": "forbidden"
+}
+```
+
+#### POST `/api/tls/reload`
+Reload the HTTPS server with current certificate configuration.
+
+**Response (200 OK):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (500 Internal Server Error):**
+```json
+{
+  "error": "Failed to reload HTTPS: Invalid certificate format"
+}
+```
+
+#### POST `/api/tls/upload/pfx`
+Upload a PFX certificate file.
+
+**Request (multipart/form-data):**
+- `pfx` (required): PFX certificate file (.pfx)
+
+**Response (201 Created):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "pfx file required"
+}
+```
+
+#### POST `/api/tls/upload/pem`
+Upload PEM certificate files (key and cert required, chain optional).
+
+**Request (multipart/form-data):**
+- `key` (required): Private key file (.key, .pem)
+- `cert` (required): Certificate file (.crt, .pem)
+- `chain` (optional): Certificate chain file (.crt, .pem)
+
+**Response (201 Created):**
+```json
+{
+  "ok": true
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "key and cert required; chain optional"
+}
+```
 
 ### System
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|---------|
-| GET | `/healthz` | Health check | Public |
+
+#### GET `/healthz`
+Health check endpoint for monitoring and load balancers.
+
+**Response (200 OK):**
+```json
+{
+  "status": "ok"
+}
+```
+
+**Note:** This endpoint is always accessible and does not require authentication.
+
+## HTTP Status Codes Reference
+
+### Success Codes
+- **200 OK**: Request successful
+- **201 Created**: Resource created successfully
+- **204 No Content**: Request successful, no content returned
+
+### Client Error Codes
+- **400 Bad Request**: Invalid request data or missing required parameters
+- **401 Unauthorized**: Authentication required or invalid credentials
+- **403 Forbidden**: Insufficient permissions (typically requires superuser role)
+- **404 Not Found**: Resource not found
+- **409 Conflict**: Resource already exists (e.g., username already taken)
+
+### Server Error Codes
+- **500 Internal Server Error**: Unexpected server error, check server logs
 
 ## Configuration Schema
 
@@ -250,14 +752,60 @@ CREATE TABLE settings (
 ```
 
 ### Configuration Entries
-The application manages configuration in KEY=VALUE format:
-- **Email Settings**: EMAIL_RECIPIENT, RETRY_COUNT, LOG_LEVEL
-- **API Credentials**: X_ECM_API_ID, X_ECM_API_KEY, X_CP_API_ID, X_CP_API_KEY
-- **API URLs**: NET_DEVICE_API_URL, NET_DEVICE_METRICS_API_URL, etc.
-- **Account Info**: ACCOUNT, USERNAME, PASS, DOMAIN
-- **File Operations**: Output_Dir, WINDOWS_SHARE, PUSH_FILES
-- **Target Settings**: TARGET, GPORT
-- **Device Config**: RP1_PING_COMMENT, RP1_PING_LOCATION, RP1_API_ROUTER_IP, etc.
+The application manages configuration in KEY=VALUE format. Configuration is organized into categories based on user roles and device types:
+
+#### System Settings (SUPERUSER Only)
+| Field | Description | Valid Values | Example |
+|-------|-------------|--------------|---------|
+| `EMAIL_RECIPIENT` | Email address for system notifications | Valid email format | `admin@company.com` |
+| `RETRY_COUNT` | Number of retry attempts for failed operations | Integer (1-10) | `3` |
+| `LOG_LEVEL` | Logging verbosity level | `info`, `debug`, `error` | `info` |
+
+#### API Credentials (SUPERUSER Only)
+| Field | Description | Valid Values | Example |
+|-------|-------------|--------------|---------|
+| `X_ECM_API_ID` | ECM API identifier | Alphanumeric string | `api_user_123` |
+| `X_ECM_API_KEY` | ECM API authentication key | Base64 encoded string | `dGVzdF9rZXk=` |
+| `X_CP_API_ID` | CP API identifier | Alphanumeric string | `cp_user_456` |
+| `X_CP_API_KEY` | CP API authentication key | Base64 encoded string | `Y3Bfa2V5XzEyMw==` |
+
+#### Network Configuration (SUPERUSER Only)
+| Field | Description | Valid Values | Example |
+|-------|-------------|--------------|---------|
+| `NET_DEVICE_API_URL` | Network device API endpoint | Valid HTTP/HTTPS URL | `https://api.company.com/devices` |
+| `NET_DEVICE_METRICS_API_URL` | Network device metrics API endpoint | Valid HTTP/HTTPS URL | `https://metrics.company.com/api` |
+| `NET_DEVICE_SIGNAL_SAMPLES_API_URL` | Signal samples API endpoint | Valid HTTP/HTTPS URL | `https://samples.company.com/api` |
+| `ACCOUNT` | Account API endpoint | Valid HTTP/HTTPS URL | `https://account.company.com/api` |
+| `USERNAME` | System username for API authentication | Alphanumeric string | `system_user` |
+| `PASS` | System password for API authentication | Secure password string | `SecurePass123!` |
+| `DOMAIN` | Network domain identifier | Domain name | `ericsson` |
+
+#### File Operations (SUPERUSER Only)
+| Field | Description | Valid Values | Example |
+|-------|-------------|--------------|---------|
+| `Output_Dir` | Local output directory path | Valid filesystem path | `/opt/eni/output` |
+| `WINDOWS_SHARE` | Windows network share path | UNC path format | `\\\\server\\share\\eni` |
+| `PUSH_FILES` | Enable file pushing to remote systems | `YES`, `NO` | `YES` |
+| `TARGET` | Target IP address for operations | Valid IPv4 address | `198.19.255.253` |
+| `GPORT` | Gateway port number | Port number (1-65535) | `8080` |
+
+#### Device-Specific Configuration (USER & SUPERUSER)
+| Field Pattern | Description | Valid Values | Example |
+|---------------|-------------|--------------|---------|
+| `RP{n}_PING_COMMENT` | Description for ping test device n | Free text (max 100 chars) | `Main Test Device` |
+| `RP{n}_PING_LOCATION` | Physical location of ping test device n | Free text (max 100 chars) | `Central Office Room 5` |
+| `RP{n}_BW_COMMENT` | Description for bandwidth test device n | Free text (max 100 chars) | `Bandwidth Test Unit A` |
+| `RP{n}_BW_LOCATION` | Physical location of bandwidth test device n | Free text (max 100 chars) | `Central Office Room 5` |
+
+#### Advanced Device Configuration (SUPERUSER Only)
+| Field Pattern | Description | Valid Values | Example |
+|---------------|-------------|--------------|---------|
+| `RP{n}_API_ROUTER_IP` | IP address of API router for device n | Valid IPv4 address | `100.66.27.8` |
+| `RP{n}_CP_ROUTER_ID` | CradlePoint router ID for device n | Alphanumeric string | `router_001` |
+| `RP{n}_TCP_UPLINK_ARGS` | TCP uplink test arguments | Command line arguments | `--duration 60 --parallel 4` |
+| `RP{n}_TCP_DOWNLINK_ARGS` | TCP downlink test arguments | Command line arguments | `--duration 60 --parallel 8` |
+
+**Note:** `{n}` represents the device number (1, 2, 3, etc.) based on the `rp_count` setting. The system dynamically generates configuration fields for each device up to the specified count.
 
 ## Security Features
 
@@ -336,6 +884,97 @@ The application can be containerized with:
 - Default session secret in development
 - SSH key encryption relies on environment or generated key
 - No rate limiting on authentication endpoints
+
+## Performance Considerations
+
+### System Performance Characteristics
+
+#### Database Performance
+- **SQLite Database**: Single-file database suitable for small to medium deployments
+- **Connection Management**: Database connections are created per-request and closed immediately
+- **Query Performance**: Most queries use indexed primary keys for optimal performance
+- **Concurrent Access**: SQLite handles concurrent reads well; writes are serialized
+
+#### Memory Usage
+- **Typical Memory Footprint**: 50-100MB for the Node.js process
+- **Session Storage**: In-memory session store with SQLite backing
+- **Configuration Caching**: Configuration entries are loaded on-demand (not cached)
+- **SSH Key Handling**: Private keys are loaded and decrypted per-operation
+
+#### Network Performance
+- **SSH Operations**: Sequential processing of devices (not parallel)
+- **File Transfer**: Uses SFTP for efficient binary file transfers
+- **API Response Times**: Typical response times under 100ms for most operations
+- **Concurrent Users**: Supports multiple concurrent users with session isolation
+
+### Scaling Considerations
+
+#### Small Deployments (1-10 devices)
+- **Recommended**: Single server deployment
+- **Performance**: Excellent performance with minimal resource requirements
+- **Limitations**: None significant
+
+#### Medium Deployments (10-50 devices)
+- **Recommended**: Single server with SSD storage
+- **Considerations**: 
+  - Monitor database file size (SQLite handles up to ~281TB)
+  - Consider connection pooling for high concurrent usage
+  - SSD recommended for better I/O performance
+- **Limitations**: SSH operations may take longer with many devices
+
+#### Large Deployments (50+ devices)
+- **Recommended**: 
+  - Consider database migration to PostgreSQL for better concurrency
+  - Implement connection pooling
+  - Use load balancer for multiple application instances
+  - Consider horizontal scaling with shared session store
+- **Performance Optimizations**:
+  - Implement SSH operation queuing for parallel processing
+  - Add configuration caching layer
+  - Consider Redis for session storage
+  - Implement API rate limiting
+
+### Performance Monitoring
+
+#### Key Metrics to Monitor
+- **Response Times**: API endpoint response times
+- **Database Size**: SQLite database file size growth
+- **Memory Usage**: Node.js process memory consumption
+- **SSH Operation Duration**: Time taken for config get/commit operations
+- **Concurrent Sessions**: Number of active user sessions
+
+#### Performance Bottlenecks
+1. **SSH Operations**: Largest performance impact, especially with many devices
+2. **Database Writes**: Configuration updates and logging operations
+3. **File I/O**: SSH key encryption/decryption and certificate operations
+4. **Network Latency**: SSH connections to remote devices
+
+#### Optimization Recommendations
+- **SSH Parallelization**: Implement parallel SSH operations for better throughput
+- **Database Indexing**: Add indexes on frequently queried fields
+- **Caching**: Implement configuration and settings caching
+- **Connection Pooling**: Use connection pooling for database operations
+- **Async Processing**: Move long-running operations to background queues
+
+### Resource Requirements
+
+#### Minimum Requirements
+- **CPU**: 1 core, 1GHz
+- **RAM**: 512MB
+- **Storage**: 1GB free space
+- **Network**: 100Mbps connection
+
+#### Recommended Requirements
+- **CPU**: 2 cores, 2GHz
+- **RAM**: 2GB
+- **Storage**: 10GB SSD
+- **Network**: 1Gbps connection
+
+#### High-Performance Requirements
+- **CPU**: 4+ cores, 3GHz
+- **RAM**: 8GB+
+- **Storage**: 100GB+ NVMe SSD
+- **Network**: 10Gbps connection
 
 ## Development Workflow
 
