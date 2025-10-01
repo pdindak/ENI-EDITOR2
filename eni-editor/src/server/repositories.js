@@ -10,9 +10,26 @@ export function updateSettings(db, values) {
 	const dbc = db || connectDatabase();
 	const current = dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 	const next = { ...current, ...values };
-	dbc.prepare(
-		`UPDATE settings SET rp_count = ?, linux_source_path = ?, rpi_destination_path = ?, updated_at = datetime('now') WHERE id = 1`
-	).run(next.rp_count, next.linux_source_path, next.rpi_destination_path);
+	// Only update fields that are provided and not undefined
+	const updates = [];
+	const params = [];
+	if (values.rp_count !== undefined) {
+		updates.push('rp_count = ?');
+		params.push(next.rp_count);
+	}
+	if (values.linux_source_path !== undefined) {
+		updates.push('linux_source_path = ?');
+		params.push(next.linux_source_path);
+	}
+	if (values.rpi_destination_path !== undefined) {
+		updates.push('rpi_destination_path = ?');
+		params.push(next.rpi_destination_path);
+	}
+	updates.push('updated_at = datetime(\'now\')');
+	
+	if (updates.length > 1) { // More than just updated_at
+		dbc.prepare(`UPDATE settings SET ${updates.join(', ')} WHERE id = 1`).run(...params);
+	}
 	return dbc.prepare('SELECT * FROM settings WHERE id = 1').get();
 }
 
