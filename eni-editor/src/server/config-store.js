@@ -22,9 +22,20 @@ export function getAllConfig() {
 
 export function setConfigEntries(entries) {
 	const db = ensureConfigSchema();
-	const upsert = db.prepare('INSERT INTO config_entries (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
+	const insert = db.prepare('INSERT INTO config_entries (key, value) VALUES (?, ?)');
+	const update = db.prepare('UPDATE config_entries SET value = ? WHERE key = ?');
 	const tx = db.transaction((pairs) => {
-		for (const [k, v] of pairs) upsert.run(k, v);
+		for (const [k, v] of pairs) {
+			try {
+				insert.run(k, v);
+			} catch (e) {
+				if (e.code === 'SQLITE_CONSTRAINT') {
+					update.run(v, k);
+				} else {
+					throw e;
+				}
+			}
+		}
 	});
 	const pairs = Object.entries(entries);
 	tx(pairs);
