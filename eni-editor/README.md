@@ -110,7 +110,12 @@ eni-editor/
 
 ## 📖 Documentation
 
-For detailed documentation, see [DOCUMENTATION.md](./DOCUMENTATION.md)
+Comprehensive documentation is available:
+
+- **[APPLICATION_DOCUMENTATION.md](./APPLICATION_DOCUMENTATION.md)** - Complete technical documentation with API examples, error handling, performance tuning, and backup procedures
+- **[USER_GUIDE.md](./USER_GUIDE.md)** - User-friendly guide for ENI-USER and ENI-SUPERUSER roles
+- **[DOCUMENTATION.md](./DOCUMENTATION.md)** - General system documentation
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
 
 ## 🔄 Workflow
 

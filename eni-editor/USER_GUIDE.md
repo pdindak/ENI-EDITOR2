@@ -347,6 +347,7 @@ TARGET="198.19.255.253"
 #### "NOT NULL constraint failed"
 - **Cause**: Required fields are missing from configuration
 - **Solution**: Fill in all required fields before saving
+- **Example**: `NOT NULL constraint failed: settings.linux_source_path`
 
 #### "SSH connection failed"
 - **Cause**: Cannot connect to ENI device
@@ -355,10 +356,50 @@ TARGET="198.19.255.253"
   - Verify SSH keys are correct
   - Ensure device is online and accessible
   - Check network connectivity
+- **Debug Steps**:
+  ```bash
+  # Test connectivity
+  ping 192.168.1.100
+  telnet 192.168.1.100 22
+  
+  # Test SSH manually
+  ssh -i /path/to/private/key root@192.168.1.100
+  ```
 
 #### "Permission denied"
 - **Cause**: Insufficient privileges for the operation
 - **Solution**: Contact your superuser or check your user role
+
+#### "No ENI server accessible"
+- **Cause**: All ENI servers are unreachable
+- **Solutions**:
+  - Check device inventory for active ENI servers
+  - Verify network connectivity to all ENI servers
+  - Ensure SSH keys are properly uploaded
+  - Check operation logs for specific error details
+
+#### "Failed pushing to [device]"
+- **Cause**: SFTP operation failed on target device
+- **Solutions**:
+  - Check target directory permissions
+  - Ensure target directory exists
+  - Verify disk space on target device
+  - Check if device is online and accessible
+
+#### "Invalid credentials"
+- **Cause**: Authentication failure
+- **Solutions**:
+  - Verify username and password
+  - Check if account exists and is active
+  - Clear browser cookies and try again
+  - Contact administrator if issues persist
+
+#### "forbidden"
+- **Cause**: Insufficient permissions for superuser operations
+- **Solutions**:
+  - Ensure you're logged in as ENI-SUPERUSER
+  - Check session hasn't expired
+  - Re-authenticate if necessary
 
 ---
 
