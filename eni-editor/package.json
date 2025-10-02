@@ -14,8 +14,21 @@
     "lint": "next lint",
     "test:install": "playwright install --with-deps",
     "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:auth": "playwright test auth-comprehensive.spec.js",
+    "test:config": "playwright test config-comprehensive.spec.js",
+    "test:devices": "playwright test devices-comprehensive.spec.js",
+    "test:settings": "playwright test settings-comprehensive.spec.js",
+    "test:ssh": "playwright test ssh-ops-comprehensive.spec.js",
+    "test:tls": "playwright test tls-comprehensive.spec.js",
+    "test:api": "playwright test api-validation-comprehensive.spec.js",
+    "test:security": "playwright test security-comprehensive.spec.js",
+    "test:integration": "playwright test integration-comprehensive.spec.js",
+    "test:performance": "playwright test performance-comprehensive.spec.js",
+    "test:comprehensive": "playwright test *-comprehensive.spec.js",
+    "test:original": "playwright test auth.spec.js devices.spec.js e2e.spec.js settings_config.spec.js tls.spec.js",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:e2e",
-    "test:e2e:ui": "playwright test --ui"
+    "coverage:comprehensive": "nyc --reporter=lcov --reporter=text-summary npm run test:comprehensive"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
