@@ -1,19 +1,22 @@
 {
   "all": true,
-  "extension": [
-    ".js"
-  ],
+  "extension": [".js", ".ts", ".tsx"],
   "include": [
-    "server.js",
-    "src/server/**/*.js"
+    "src/**/*.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "server.js"
   ],
   "exclude": [
+    "**/*.d.ts",
+    "src/**/*.d.ts",
     "tests/**",
-    "node_modules/**"
+    "playwright.config.*",
+    "next.config.*",
+    "**/*.spec.*"
   ],
-  "reporter": [
-    "lcov",
-    "text-summary"
-  ],
+  "reporter": ["lcov", "text-summary"],
+  "report-dir": "./coverage",
+  "check-coverage": false,
   "cache": false
 }
