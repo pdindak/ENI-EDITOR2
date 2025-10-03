@@ -51,7 +51,11 @@ jobs:
           NODE_ENV: production
           RESET_CONFIG_SCHEMA: '1'
           CONFIG_DB_DISABLED: '1'
+          DATA_DIR: ${{ runner.temp }}/eni-editor-data
+          SESSION_STORE: memory
+          MEMORY_DB: '1'
         run: |
+          mkdir -p "${{ runner.temp }}/eni-editor-data"
           nohup npm run start > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz
 

@@ -7,10 +7,12 @@ import { connectDatabase } from './db';
 const SQLiteStore = SQLiteStoreFactory(session);
 
 export function configureSessions(app: Express) {
+	const useMemory = process.env.CI === 'true' || process.env.SESSION_STORE === 'memory';
 	const dataDir = process.env.DATA_DIR || 'data';
+	const store = useMemory ? undefined : new SQLiteStore({ db: 'sessions.sqlite', dir: dataDir });
 	app.use(
 		session({
-			store: new SQLiteStore({ db: 'sessions.sqlite', dir: dataDir }),
+			store,
 			secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
 			resave: false,
 			saveUninitialized: false,

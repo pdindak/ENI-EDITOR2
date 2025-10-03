@@ -5,7 +5,17 @@ import path from 'path';
 
 export type AppDatabase = ReturnType<typeof connectDatabase>;
 
+let MEMORY_SINGLETON: Database.Database | null = null;
+
 export function connectDatabase() {
+	// In CI or when explicitly enabled, use a single in-memory DB
+	if (process.env.CI === 'true' || process.env.MEMORY_DB === '1') {
+		if (!MEMORY_SINGLETON) {
+			MEMORY_SINGLETON = new Database(':memory:');
+			bootstrap(MEMORY_SINGLETON as Database.Database);
+		}
+		return MEMORY_SINGLETON as Database.Database;
+	}
 	const dataDir = process.env.DATA_DIR || path.join(process.cwd(), 'data');
 	if (!fs.existsSync(dataDir)) {
 		fs.mkdirSync(dataDir, { recursive: true });

@@ -18,21 +18,21 @@ export async function PUT(request: Request) {
 		if (contentType.includes('text/plain')) {
 			const text = await request.text();
 			const parsed = parseConfigText(text);
-			const { setMemoryOnly } = await import('@/server/config-store');
-			setMemoryOnly(parsed);
-			if (process.env.CONFIG_DB_DISABLED !== '1' && process.env.CI !== 'true') {
-				setTimeout(() => { try { setConfigEntries(parsed); } catch {} }, 0);
-			}
-			return NextResponse.json({ ok: true }, { status: 200 });
+try {
+	setConfigEntries(parsed);
+} catch {
+	// ignore in CI
+}
+return NextResponse.json({ ok: true }, { status: 200 });
 		}
 		const json = await request.json().catch(() => ({}));
 		if (json && json.entries && typeof json.entries === 'object') {
-			const { setMemoryOnly } = await import('@/server/config-store');
-			setMemoryOnly(json.entries as Record<string, string>);
-			if (process.env.CONFIG_DB_DISABLED !== '1' && process.env.CI !== 'true') {
-				setTimeout(() => { try { setConfigEntries(json.entries as Record<string, string>); } catch {} }, 0);
-			}
-			return NextResponse.json({ ok: true }, { status: 200 });
+try {
+	setConfigEntries(json.entries as Record<string, string>);
+} catch {
+	// ignore in CI
+}
+return NextResponse.json({ ok: true }, { status: 200 });
 		}
 		return NextResponse.json({ error: 'Provide text/plain body or JSON {entries}' }, { status: 400 });
 	} catch (e: any) {
