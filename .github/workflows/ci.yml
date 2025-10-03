@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: eni-editor/package-lock.json
 
@@ -29,10 +29,18 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
       - name: Start server
+        env:
+          NODE_ENV: production
         run: |
           nohup npm run start > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz
@@ -43,7 +51,7 @@ jobs:
           node -e "const fs=require('fs');console.log(fs.readdirSync('tests'))"
 
       - name: Run E2E tests
-        run: npx nyc --reporter=lcov --reporter=text-summary npx playwright test -c playwright.config.cjs --reporter=github
+        run: npm run coverage
 
       - name: Upload server logs on failure
         if: failure()

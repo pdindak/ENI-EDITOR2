@@ -94,9 +94,10 @@ export async function start() {
     res.status(200).json({ status: 'ok' });
   });
 
-  // Hand off to Next for all other routes
+  // Hand off to Next for all other routes (Express 5 requires a valid pattern)
   const handle = app.getRequestHandler();
-  server.all('*', (req, res) => handle(req, res));
+  // Express 5: use a middleware catch-all to delegate to Next handler
+  server.use((req, res) => handle(req, res));
 
   // Always start HTTP on 8080
   http.createServer(server).listen(httpPort, () => {

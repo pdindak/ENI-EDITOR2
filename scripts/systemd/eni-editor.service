@@ -1,0 +1,27 @@
+# Example systemd unit for ENI-Editor
+# Copy this file to /etc/systemd/system/eni-editor.service and adjust paths as needed.
+# Then: sudo systemctl daemon-reload && sudo systemctl enable --now eni-editor
+
+[Unit]
+Description=ENI-Editor web service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Create this user or set to an existing service user
+User=eni-editor
+# Adjust this to your deployment path of the repo's eni-editor directory
+WorkingDirectory=/opt/eni-editor/ENI-EDITOR/eni-editor
+# Place environment variables in this file (see eni-editor.env.example)
+EnvironmentFile=/etc/default/eni-editor
+# Start the HTTP/HTTPS server
+ExecStart=/usr/bin/node server.js
+# Restart policy
+Restart=on-failure
+RestartSec=3
+# Optional: raise file descriptor limit for heavy usage
+# LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
