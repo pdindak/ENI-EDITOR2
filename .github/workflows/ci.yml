@@ -26,6 +26,9 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      - name: Reset data dir (clean DB)
+        run: rm -rf data
+
       - name: Build Next.js
         run: npm run build
 
