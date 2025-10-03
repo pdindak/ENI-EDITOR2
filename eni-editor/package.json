@@ -15,7 +15,10 @@
     "test:install": "playwright install --with-deps",
     "test:e2e": "playwright test",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:e2e",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "clean:cache": "npm run clean:cache:unix || npm run clean:cache:win",
+    "clean:cache:unix": "rm -rf .next .turbo",
+    "clean:cache:win": "powershell -NoProfile -Command \"Remove-Item -Recurse -Force .next,.turbo -ErrorAction SilentlyContinue\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
