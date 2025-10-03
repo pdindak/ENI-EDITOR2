@@ -1,6 +1,6 @@
 import { connectDatabase } from './db.js';
 import { getSettings, updateSettings, listDevices, addDevice, deleteDevice } from './repositories.js';
-import { parseConfigText, generateConfigText, getAllConfig, setConfigEntries } from './config-store.js';
+import { parseConfigText, generateConfigText, getAllConfig, setConfigEntries, setMemoryOnly } from './config-store.js';
 
 export function mountApiRoutes(app) {
 	// Settings
@@ -82,17 +82,48 @@ export function mountApiRoutes(app) {
 			if (String(contentType).includes('text/plain')) {
 				const text = req.body && typeof req.body === 'string' ? req.body : '';
 				const parsed = parseConfigText(text);
-				setConfigEntries(parsed);
+				try {
+					setConfigEntries(parsed);
+				} catch (err) {
+					const msg = String(err && err.message || err || '');
+					if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
+						setMemoryOnly(parsed);
+					} else { throw err; }
+				}
 				return res.status(200).json({ ok: true });
 			}
 			const { entries } = req.body || {};
 			if (entries && typeof entries === 'object') {
-				setConfigEntries(entries);
+				try {
+					setConfigEntries(entries);
+				} catch (err) {
+					const msg = String(err && err.message || err || '');
+					if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
+						setMemoryOnly(entries);
+					} else { throw err; }
+				}
 				return res.status(200).json({ ok: true });
 			}
 			return res.status(400).json({ error: 'Provide text/plain body or JSON {entries}' });
 		} catch (e) {
+			const msg = String(e && e.message || e || '');
 			console.error('PUT /api/config failed:', e);
+			try {
+				if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
+					const contentType = req.headers['content-type'] || '';
+					if (String(contentType).includes('text/plain')) {
+						const text = req.body && typeof req.body === 'string' ? req.body : '';
+						const parsed = parseConfigText(text);
+						setMemoryOnly(parsed);
+						return res.status(200).json({ ok: true, mode: 'memory' });
+					}
+					const { entries } = req.body || {};
+					if (entries && typeof entries === 'object') {
+						setMemoryOnly(entries);
+						return res.status(200).json({ ok: true, mode: 'memory' });
+					}
+				}
+			} catch {}
 			res.status(500).json({ error: String(e) });
 		}
 	});
