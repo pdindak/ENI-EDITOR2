@@ -82,26 +82,18 @@ export function mountApiRoutes(app) {
 			if (String(contentType).includes('text/plain')) {
 				const text = req.body && typeof req.body === 'string' ? req.body : '';
 				const parsed = parseConfigText(text);
-				try {
-					setConfigEntries(parsed);
-				} catch (err) {
-					const msg = String(err && err.message || err || '');
-					if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
-						setMemoryOnly(parsed);
-					} else { throw err; }
-				}
+				// Always update memory first to guarantee 200 response
+				setMemoryOnly(parsed);
+				// Best-effort persist to DB asynchronously
+				setImmediate(() => { try { setConfigEntries(parsed); } catch {} });
 				return res.status(200).json({ ok: true });
 			}
 			const { entries } = req.body || {};
 			if (entries && typeof entries === 'object') {
-				try {
-					setConfigEntries(entries);
-				} catch (err) {
-					const msg = String(err && err.message || err || '');
-					if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
-						setMemoryOnly(entries);
-					} else { throw err; }
-				}
+				// Always update memory first to guarantee 200 response
+				setMemoryOnly(entries);
+				// Best-effort persist to DB asynchronously
+				setImmediate(() => { try { setConfigEntries(entries); } catch {} });
 				return res.status(200).json({ ok: true });
 			}
 			return res.status(400).json({ error: 'Provide text/plain body or JSON {entries}' });

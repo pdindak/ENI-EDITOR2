@@ -26,6 +26,11 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      - name: Clean Next build cache
+        run: |
+          rm -rf .next || true
+          rm -rf .turbo || true
+
       - name: Reset data dir (clean DB)
         run: rm -rf data
 
@@ -44,6 +49,7 @@ jobs:
       - name: Start server
         env:
           NODE_ENV: production
+          RESET_CONFIG_SCHEMA: '1'
         run: |
           nohup npm run start > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz

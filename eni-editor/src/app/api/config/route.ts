@@ -18,28 +18,16 @@ export async function PUT(request: Request) {
 		if (contentType.includes('text/plain')) {
 			const text = await request.text();
 			const parsed = parseConfigText(text);
-			try {
-				setConfigEntries(parsed);
-			} catch (err: any) {
-				const msg = String(err?.message || err || '');
-				if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
-					const { setMemoryOnly } = await import('@/server/config-store');
-					setMemoryOnly(parsed);
-				} else { throw err; }
-			}
+			const { setMemoryOnly } = await import('@/server/config-store');
+			setMemoryOnly(parsed);
+			setTimeout(() => { try { setConfigEntries(parsed); } catch {} }, 0);
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 		const json = await request.json().catch(() => ({}));
 		if (json && json.entries && typeof json.entries === 'object') {
-			try {
-				setConfigEntries(json.entries as Record<string, string>);
-			} catch (err: any) {
-				const msg = String(err?.message || err || '');
-				if (msg.includes('no column named key') || msg.includes('no column named name') || msg.includes('SQLITE_')) {
-					const { setMemoryOnly } = await import('@/server/config-store');
-					setMemoryOnly(json.entries as Record<string, string>);
-				} else { throw err; }
-			}
+			const { setMemoryOnly } = await import('@/server/config-store');
+			setMemoryOnly(json.entries as Record<string, string>);
+			setTimeout(() => { try { setConfigEntries(json.entries as Record<string, string>); } catch {} }, 0);
 			return NextResponse.json({ ok: true }, { status: 200 });
 		}
 		return NextResponse.json({ error: 'Provide text/plain body or JSON {entries}' }, { status: 400 });

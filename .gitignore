@@ -16,3 +16,7 @@ certs/
 **/sessions.sqlite
 **/server.out
 **/cookies.txt
+# NYC coverage runtime data
+**/.nyc_output/
+# Playwright test artifacts
+**/test-results/
