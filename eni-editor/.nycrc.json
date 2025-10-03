@@ -17,6 +17,10 @@
   ],
   "reporter": ["lcov", "text-summary"],
   "report-dir": "./coverage",
-  "check-coverage": false,
+  "check-coverage": true,
+  "branches": 0,
+  "functions": 0,
+  "lines": 0,
+  "statements": 0,
   "cache": false
 }
