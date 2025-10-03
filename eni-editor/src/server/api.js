@@ -84,16 +84,20 @@ export function mountApiRoutes(app) {
 				const parsed = parseConfigText(text);
 				// Always update memory first to guarantee 200 response
 				setMemoryOnly(parsed);
-				// Best-effort persist to DB asynchronously
-				setImmediate(() => { try { setConfigEntries(parsed); } catch {} });
+				// Skip DB persist entirely in CI or when disabled
+				if (process.env.CONFIG_DB_DISABLED !== '1' && process.env.CI !== 'true') {
+					setImmediate(() => { try { setConfigEntries(parsed); } catch {} });
+				}
 				return res.status(200).json({ ok: true });
 			}
 			const { entries } = req.body || {};
 			if (entries && typeof entries === 'object') {
 				// Always update memory first to guarantee 200 response
 				setMemoryOnly(entries);
-				// Best-effort persist to DB asynchronously
-				setImmediate(() => { try { setConfigEntries(entries); } catch {} });
+				// Skip DB persist entirely in CI or when disabled
+				if (process.env.CONFIG_DB_DISABLED !== '1' && process.env.CI !== 'true') {
+					setImmediate(() => { try { setConfigEntries(entries); } catch {} });
+				}
 				return res.status(200).json({ ok: true });
 			}
 			return res.status(400).json({ error: 'Provide text/plain body or JSON {entries}' });
