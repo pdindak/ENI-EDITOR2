@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
     defaults:
       run:
         working-directory: eni-editor
@@ -19,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: eni-editor/package-lock.json
 
@@ -46,7 +50,7 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Start server
+      - name: Start server (nyc instrumented)
         env:
           NODE_ENV: production
           RESET_CONFIG_SCHEMA: '1'
@@ -56,7 +60,7 @@ jobs:
           MEMORY_DB: '1'
         run: |
           mkdir -p "${{ runner.temp }}/eni-editor-data"
-          nohup npm run start > server.out 2>&1 &
+          nohup npx nyc --silent --cwd=. node server.js > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz
 
       - name: List tests for debug
@@ -65,7 +69,10 @@ jobs:
           node -e "const fs=require('fs');console.log(fs.readdirSync('tests'))"
 
       - name: Run E2E tests
-        run: npm run coverage
+        run: npx playwright test -c playwright.config.cjs --reporter=github
+
+      - name: Generate coverage report
+        run: npx nyc report --reporter=lcov --reporter=text-summary
 
       - name: Upload server logs on failure
         if: failure()

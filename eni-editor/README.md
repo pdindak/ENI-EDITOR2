@@ -17,6 +17,17 @@ npm run test:e2e
 
 ## 🧭 Installation
 
+### Running tests locally like CI
+
+- Clear caches (optional for a fresh run):
+  - npm run clean:cache
+- Start the server in CI-like mode (in one terminal):
+  - MEMORY_DB=1 SESSION_STORE=memory CONFIG_DB_DISABLED=1 RESET_CONFIG_SCHEMA=1 npm run start
+- In a second terminal, run E2E tests:
+  - PLAYWRIGHT_BASE_URL=http://127.0.0.1:8080 npm run test:e2e
+- To view the HTML report locally after a run:
+  - npx playwright show-report playwright-report
+
 ### Linux (Ubuntu 22.04+/24.04+)
 
 Prerequisites:
