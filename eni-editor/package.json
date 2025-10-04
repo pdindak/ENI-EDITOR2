@@ -52,5 +52,12 @@
     "source-map-support": "^0.5.21",
     "typescript": "^5.9.3",
     "wait-on": "^9.0.1"
+  },
+  "c8": {
+    "check-coverage": true,
+    "branches": 40,
+    "functions": 40,
+    "lines": 40,
+    "statements": 40
   }
 }

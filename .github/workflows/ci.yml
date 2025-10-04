@@ -74,6 +74,9 @@ jobs:
       - name: Generate coverage report
         run: npx c8 report --reporter=lcov --reporter=text-summary
 
+      - name: Check coverage thresholds
+        run: npx c8 check-coverage
+
       - name: Upload server logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
