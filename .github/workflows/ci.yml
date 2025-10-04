@@ -60,7 +60,7 @@ jobs:
           MEMORY_DB: '1'
         run: |
           mkdir -p "${{ runner.temp }}/eni-editor-data"
-          nohup npx nyc --silent --cwd=. node server.js > server.out 2>&1 &
+          nohup npx nyc --silent --cwd=. node -r source-map-support/register server.js > server.out 2>&1 &
           npx wait-on http://127.0.0.1:8080/healthz
 
       - name: List tests for debug

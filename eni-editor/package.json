@@ -47,6 +47,7 @@
     "eslint": "^9.37.0",
     "eslint-config-next": "^15.5.4",
     "nyc": "^17.1.0",
+    "source-map-support": "^0.5.21",
     "typescript": "^5.9.3",
     "wait-on": "^9.0.1"
   }

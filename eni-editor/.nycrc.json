@@ -22,5 +22,8 @@
   "functions": 0,
   "lines": 0,
   "statements": 0,
-  "cache": false
+  "cache": false,
+  "sourceMap": true,
+  "produce-source-map": true,
+  "excludeAfterRemap": true
 }
